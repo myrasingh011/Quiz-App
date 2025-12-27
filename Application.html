@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz App</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: honeydew;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .container {
+        width: 400px;
+        background: #333;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+    }
+    h2 { margin-bottom: 10px; }
+    button {
+        width: 80%;
+        padding: 12px;
+        font-size: 18px;
+        border: none;
+        background: #00bcd4;
+        color: #000;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 15px;
+    }
+    button:hover { background: #0097a7; }
+    .options label {
+        display: block;
+        background: #444;
+        margin: 8px 0;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        text-align: left;
+    }
+    .timer {
+        font-size: 18px;
+        margin-bottom: 10px;
+        color: yellow;
+    }
+    .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="container" id="start-screen">
+    <h2>Welcome to Quiz</h2>
+    <button onclick="startQuiz()">Let's Begin</button>
+</div>
+
+<div class="container hidden" id="quiz-box">
+    <h2 id="question">Question</h2>
+    <div class="timer">Time Left: <span id="time">10</span>s</div>
+    <div class="options" id="options"></div>
+    <button onclick="prevQuestion()">Previous</button>
+    <button onclick="nextQuestion()">Next</button>
+</div>
+
+<div class="container hidden" id="result">
+    <h2>Your Score: <span id="score"></span> / 10</h2>
+    <button onclick="location.reload()">Restart Quiz</button>
+</div>
+
+<script>
+const questions = [
+    {
+        q: "What is the Full Form of HTML?",
+        options: ["HyperText Markup Language", "HighText Makeup Language", "Hyper Tool Multi Language", "None"],
+        answer: 0
+    },
+    {
+        q: "Why do we use CSS?",
+        options: ["Structure", "Database", "Logic", "Styling"],
+        answer: 3
+    },
+    {
+        q: "Which type of language is javascript?",
+        options: ["Markup", "Styling", "Programming", "Database"],
+        answer: 3
+    },
+    {
+        q: "Which tag is used for line break?",
+        options: ["break", "line", "br", "None"],
+        answer: 2
+    },
+    {
+        q: "Which tag is used to link CSS file with HTML?",
+        options: ["script", "css", "style", "link"],
+        answer: 3
+    },
+    {
+        q:"Which keyword is used to declare variables in JavaScript?",
+        options:["int", "var/let/const", "char", "string"],
+        answer:1
+    },
+    {
+        q:"Which statement requires to prints output in javascript?",
+        options:["printf()", "log.console()", "console.log()", "print()"],
+        answer:2
+    },
+    {
+        q:"Which HTML tag is used to display a numbered list?",
+        options:["ol", "li", "ul", "dl"],
+        answer: 0
+    },
+    {
+        q:"Which CSS is written inside a <style> tag in HTML?",
+        options:["Inline CSS", "External CSS", "Internal CSS", "None"],
+        answer: 2
+    },
+    {
+        q:"JavaScript was developed by?",
+        options:["Dennis Ritchie", "Guido van Rossam", "james Gosling", "Brendan Eich"],
+        answer: 3
+    }
+];
+
+let index = 0;
+let score = 0;
+let selected = Array(questions.length).fill(null);
+let timeLeft = 10;
+let timer;
+
+function shuffleQuestions() {
+    for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [questions[i], questions[j]] = [questions[j], questions[i]];
+    }
+}
+
+function startQuiz() {
+    shuffleQuestions(); 
+
+    document.getElementById("start-screen").classList.add("hidden");
+    document.getElementById("quiz-box").classList.remove("hidden");
+    loadQuestion();
+}
+
+
+function startTimer() {
+    clearInterval(timer);
+    timeLeft = 10;
+    document.getElementById("time").innerText = timeLeft;
+
+    timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("time").innerText = timeLeft;
+
+        if (timeLeft === 0) nextQuestion();
+    }, 1000);
+}
+
+function loadQuestion() {
+    const q = questions[index];
+    document.getElementById("question").innerText = q.q;
+
+    let html = "";
+    q.options.forEach((opt, i) => {
+        html += `
+        <label>
+            <input type="radio" name="option" ${selected[index] === i ? "checked" : ""} onclick="selectOption(${i})">
+            ${opt}
+        </label>`;
+    });
+
+    document.getElementById("options").innerHTML = html;
+    startTimer();
+}
+
+function selectOption(i) { selected[index] = i; }
+
+function nextQuestion() {
+
+    if (selected[index] === null) {
+        alert("please try the question");
+        return;
+    }
+
+    if (index < questions.length - 1) {
+        index++;
+        loadQuestion();
+    } else finishQuiz();
+}
+
+
+function prevQuestion() {
+    if (index > 0) {
+        index--;
+        loadQuestion();
+    }
+}
+
+function finishQuiz() {
+    clearInterval(timer);
+    selected.forEach((ans, i) => {
+        if (ans === questions[i].answer) score++;
+    });
+
+    document.getElementById("quiz-box").classList.add("hidden");
+    document.getElementById("result").classList.remove("hidden");
+    document.getElementById("score").innerText = score;
+}
+</script>
+
+</body>
+</html>
